@@ -1,0 +1,145 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getSingleOrder = exports.getOrders = exports.placeOrder = void 0;
+const prismaClient_1 = __importDefault(require("../../prisma/prismaClient"));
+// place order 
+const placeOrder = async (req, res) => {
+    try {
+        const userId = req.user?.userId;
+        if (!userId) {
+            res.status(403).json({ message: 'Unauthorized' });
+            return;
+        }
+        const { subTotal, tax, discount, deliveryCharge, finalTotal, billingAddress, deliveryAddress, products, paymentType, transactionId, paymentDatetime, paymentStatus, } = req.body;
+        if (!Array.isArray(products) || products.length === 0) {
+            res.status(400).json({ message: 'Products list is required' });
+            return;
+        }
+        const orderItems = products.map((item) => ({
+            productId: item.productId,
+            variantId: item.variantId || null,
+            unitPrice: item.unitPrice,
+            quantity: item.quantity,
+        }));
+        const order = await prismaClient_1.default.order.create({
+            data: {
+                userId,
+                subTotal,
+                tax,
+                discount,
+                deliveryCharge,
+                finalTotal,
+                billingAddress,
+                deliveryAddress,
+                is_payment_done: paymentStatus === 'SUCCESS',
+                orderItems: { create: orderItems },
+                payment: paymentType
+                    ? {
+                        create: {
+                            paymentType,
+                            transactionId,
+                            status: paymentStatus || 'PENDING',
+                            paymentDatetime: paymentDatetime ? new Date(paymentDatetime) : undefined,
+                        },
+                    }
+                    : undefined,
+            },
+            include: {
+                orderItems: true,
+                payment: true,
+            },
+        });
+        res.status(201).json(order);
+    }
+    catch (error) {
+        console.error('Error placing order:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+exports.placeOrder = placeOrder;
+const getOrders = async (req, res) => {
+    try {
+        const userId = req.user?.userId;
+        if (!userId) {
+            res.status(401).json({ message: 'Unauthorized: user not found' });
+            return;
+        }
+        const orders = await prismaClient_1.default.order.findMany({
+            where: { userId },
+            orderBy: { createdAt: 'desc' },
+            include: {
+                orderItems: {
+                    include: {
+                        product: {
+                            select: { id: true, name: true, image: true },
+                        },
+                        variant: {
+                            select: {
+                                id: true,
+                                description: true,
+                                specification: true,
+                            },
+                        },
+                    },
+                },
+                payment: true,
+            },
+        });
+        res.status(200).json(orders);
+    }
+    catch (error) {
+        console.error('Error fetching orders:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+exports.getOrders = getOrders;
+const getSingleOrder = async (req, res) => {
+    try {
+        const userId = req.user?.userId;
+        const orderId = parseInt(req.params.orderId);
+        if (!userId) {
+            res.status(401).json({ message: 'Unauthorized' });
+            return;
+        }
+        if (isNaN(orderId)) {
+            res.status(400).json({ message: 'Invalid order ID' });
+            return;
+        }
+        const order = await prismaClient_1.default.order.findFirst({
+            where: {
+                id: orderId,
+                userId: userId,
+            },
+            include: {
+                orderItems: {
+                    include: {
+                        product: {
+                            select: { id: true, name: true, image: true },
+                        },
+                        variant: {
+                            select: {
+                                id: true,
+                                description: true,
+                                specification: true,
+                            },
+                        },
+                    },
+                },
+                payment: true,
+            },
+        });
+        if (!order) {
+            res.status(404).json({ message: 'Order not found' });
+            return;
+        }
+        res.status(200).json(order);
+    }
+    catch (error) {
+        console.error('Error fetching order:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+exports.getSingleOrder = getSingleOrder;
