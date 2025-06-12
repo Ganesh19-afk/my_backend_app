@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Product List</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-100 text-gray-900 p-6">
+    <div class="max-w-5xl mx-auto">
+      <h1 class="text-3xl font-bold mb-6 text-center">All Products</h1>
+      <div
+        id="product-list"
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+      ></div>
+      <div
+        id="product-detail"
+        class="mt-8 p-4 border border-gray-300 rounded bg-white hidden"
+      ></div>
+    </div>
+
+    <script>
+      const API_BASE =
+        "https://12d9-2401-4900-889e-3cbf-4dd2-1e70-39b6-3950.ngrok-free.app";
+
+      async function fetchProducts() {
+        try {
+          const res = await fetch(`${API_BASE}/product`);
+          const text = await res.text(); // Get response as plain text
+          console.log(text); // See what came back
+          const products = JSON.parse(text);
+          //   const products = await res.json();
+
+          const listEl = document.getElementById("product-list");
+          listEl.innerHTML = "";
+
+          products.forEach((product) => {
+            const div = document.createElement("div");
+            div.className =
+              "bg-white p-4 rounded shadow cursor-pointer hover:bg-gray-50 transition";
+            div.innerHTML = `
+            <h2 class="text-xl font-semibold">${product.name}</h2>
+            <p class="text-sm text-gray-600">${
+              product.description || "No description available"
+            }</p>
+          `;
+            div.onclick = () => fetchProductDetail(product.slug);
+            listEl.appendChild(div);
+          });
+        } catch (error) {
+          console.error("Failed to fetch products:", error);
+          document.getElementById("product-list").innerHTML =
+            '<p class="text-red-500">Error loading products.</p>';
+        }
+      }
+
+      async function fetchProductDetail(slug) {
+        try {
+          const res = await fetch(`${API_BASE}/product/product_info/${slug}`);
+          const product = await res.json();
+
+          const detailEl = document.getElementById("product-detail");
+          detailEl.innerHTML = `
+          <h2 class="text-2xl font-bold mb-2">${product.name}</h2>
+          <p class="mb-2 text-gray-700">${
+            product.description || "No description available"
+          }</p>
+          <p class="text-sm text-gray-500">Slug: ${product.slug}</p>
+        `;
+          detailEl.classList.remove("hidden");
+        } catch (error) {
+          console.error("Failed to fetch product detail:", error);
+          document.getElementById("product-detail").innerHTML =
+            '<p class="text-red-500">Error loading product details.</p>';
+          document.getElementById("product-detail").classList.remove("hidden");
+        }
+      }
+
+      // Initialize
+      fetchProducts();
+    </script>
+  </body>
+</html>
