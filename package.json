@@ -3,11 +3,13 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon src/app.ts",
+    "postinstall": "prisma generate",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
     "build": "tsc",
-    "start": "node dist/src/app.js && npx prisma db seed && npx prisma migrate deploy",
-    "postinstall": "prisma generate"
+    "start": "npx prisma migrate deploy && npx prisma db seed && node dist/src/app.js"
   },
+ 
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
   },

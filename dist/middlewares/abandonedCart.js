@@ -5,13 +5,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_cron_1 = __importDefault(require("node-cron"));
 const abandonedMail_1 = require("./abandonedMail");
-const prismaClient_1 = __importDefault(require("../prisma/prismaClient"));
+const prisma_1 = __importDefault(require("../src/Db/prisma"));
 // Cron job to check abandoned carts every hour
 node_cron_1.default.schedule('0 * * * *', async () => {
     try {
         console.log('Running abandoned cart cleanup job');
         // Get carts where `updatedAt` is older than 24 hours (abandoned carts)
-        const abandonedCarts = await prismaClient_1.default.cart.findMany({
+        const abandonedCarts = await prisma_1.default.cart.findMany({
             where: {
                 updatedAt: {
                     lt: new Date(new Date().getTime() - 1 * 60 * 60 * 1000), // 24 hours ago

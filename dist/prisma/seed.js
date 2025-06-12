@@ -1,10 +1,10 @@
 "use strict";
+// prisma/seed.ts
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-// prisma/seed.ts
-const prismaClient_1 = __importDefault(require("./prismaClient"));
+const prisma_1 = __importDefault(require("../src/Db/prisma"));
 const hash_1 = require("../src/scripts/hash");
 async function main() {
     const admins = [
@@ -17,9 +17,9 @@ async function main() {
         },
     ];
     for (const admin of admins) {
-        const adminExists = await prismaClient_1.default.user.findUnique({ where: { email: admin.email } });
+        const adminExists = await prisma_1.default.user.findUnique({ where: { email: admin.email } });
         if (!adminExists) {
-            await prismaClient_1.default.user.create({
+            await prisma_1.default.user.create({
                 data: {
                     name: admin.name,
                     email: admin.email,
@@ -39,5 +39,5 @@ main()
     process.exit(1);
 })
     .finally(async () => {
-    await prismaClient_1.default.$disconnect();
+    await prisma_1.default.$disconnect();
 });

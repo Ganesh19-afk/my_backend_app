@@ -1,8 +1,11 @@
 import express, { Request, Response } from 'express'
-import prisma from '../../prisma/prismaClient'
+// import prisma from '../../prisma/prismaClient'
 import { createAddressSchema, updateAddressSchema } from '../Types/addressTypes';
 import { ZodError } from 'zod';
 import { CustomRequest } from "../scripts/jwt";
+import { Prisma } from '@prisma/client';
+import prisma from '../Db/prisma';
+// import prisma from '../../prisma/prismaClient';
 
 
 

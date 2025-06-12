@@ -1,6 +1,6 @@
 import cron from 'node-cron';
 import { sendAbandonedCartEmail } from './abandonedMail';
-import prisma from '../prisma/prismaClient';
+import prisma from '../src/Db/prisma';
 
 // Cron job to check abandoned carts every hour
 cron.schedule('0 * * * *', async () => {

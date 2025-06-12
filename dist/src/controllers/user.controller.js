@@ -4,11 +4,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getUser = exports.createUser = void 0;
-const prismaClient_1 = __importDefault(require("../../prisma/prismaClient"));
+const prisma_1 = __importDefault(require("../Db/prisma"));
 const createUser = async (req, res) => {
     try {
         const { name, age, email, password, profile } = req.body;
-        const user = await prismaClient_1.default.user.create({
+        const user = await prisma_1.default.user.create({
             data: { name, age, email, password, profile },
         });
         res.status(200).json(user);
@@ -20,7 +20,7 @@ const createUser = async (req, res) => {
 exports.createUser = createUser;
 const getUser = async (req, res) => {
     try {
-        const users = await prismaClient_1.default.user.findMany();
+        const users = await prisma_1.default.user.findMany();
         res.status(200).json(users);
     }
     catch (error) {

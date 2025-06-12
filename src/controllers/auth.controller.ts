@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { hashPassword } from "../scripts/hash";
-import prisma from "../../prisma/prismaClient";
+import prisma from '../Db/prisma';
 import bcrypt from "bcryptjs";
 import { generateToken } from "../scripts/jwt";
 import { Role } from "../../generated/prisma";

@@ -1,5 +1,6 @@
 // prisma/seed.ts
-import prisma from './prismaClient';
+
+import prisma from '../src/Db/prisma';
 import { hashPassword } from '../src/scripts/hash'
 
 async function main() {

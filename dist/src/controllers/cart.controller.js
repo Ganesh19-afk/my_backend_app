@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteCartItem = exports.getCart = exports.addToCart = void 0;
-const prismaClient_1 = __importDefault(require("../../prisma/prismaClient"));
+const prisma_1 = __importDefault(require("../Db/prisma"));
 const addToCart = async (req, res) => {
     try {
         const userId = Number(req.user?.userId);
@@ -13,12 +13,12 @@ const addToCart = async (req, res) => {
             res.status(400).json({ message: "Provide either productId or variantId, not both." });
             return;
         }
-        const cart = await prismaClient_1.default.cart.upsert({
+        const cart = await prisma_1.default.cart.upsert({
             where: { userId },
             create: { userId },
             update: {},
         });
-        const existingItem = await prismaClient_1.default.cartItem.findFirst({
+        const existingItem = await prisma_1.default.cartItem.findFirst({
             where: {
                 cartId: cart.id,
                 productId: productId || undefined,
@@ -26,14 +26,14 @@ const addToCart = async (req, res) => {
             },
         });
         if (existingItem) {
-            const updated = await prismaClient_1.default.cartItem.update({
+            const updated = await prisma_1.default.cartItem.update({
                 where: { id: existingItem.id },
                 data: { quantity: existingItem.quantity + (quantity ?? 1) },
             });
             res.json(updated);
             return;
         }
-        const newItem = await prismaClient_1.default.cartItem.create({
+        const newItem = await prisma_1.default.cartItem.create({
             data: {
                 cartId: cart.id,
                 productId,
@@ -51,7 +51,7 @@ exports.addToCart = addToCart;
 const getCart = async (req, res) => {
     const userId = Number(req.user?.userId);
     try {
-        const cart = await prismaClient_1.default.cart.findUnique({
+        const cart = await prisma_1.default.cart.findUnique({
             where: { userId },
             include: {
                 items: {
@@ -86,7 +86,7 @@ const deleteCartItem = async (req, res) => {
             res.status(401).json({ message: 'productId not found' });
             return;
         }
-        const item = await prismaClient_1.default.cartItem.findUnique({
+        const item = await prisma_1.default.cartItem.findUnique({
             where: { id: Number(itemId) },
             include: { cart: true },
         });
@@ -94,7 +94,7 @@ const deleteCartItem = async (req, res) => {
             res.status(404).json({ message: 'Item not found' });
             return;
         }
-        await prismaClient_1.default.cartItem.delete({ where: { id: item.id } });
+        await prisma_1.default.cartItem.delete({ where: { id: item.id } });
         res.json({ message: 'Item removed from cart' });
     }
     catch (error) {

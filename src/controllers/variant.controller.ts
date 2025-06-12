@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import prisma from "../../prisma/prismaClient";
+import prisma from '../Db/prisma';
 import fs from "fs";
 import path from "path";
 

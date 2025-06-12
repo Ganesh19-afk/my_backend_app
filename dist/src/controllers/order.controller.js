@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getSingleOrder = exports.getOrders = exports.placeOrder = void 0;
-const prismaClient_1 = __importDefault(require("../../prisma/prismaClient"));
+const prisma_1 = __importDefault(require("../Db/prisma"));
 // place order 
 const placeOrder = async (req, res) => {
     try {
@@ -24,7 +24,7 @@ const placeOrder = async (req, res) => {
             unitPrice: item.unitPrice,
             quantity: item.quantity,
         }));
-        const order = await prismaClient_1.default.order.create({
+        const order = await prisma_1.default.order.create({
             data: {
                 userId,
                 subTotal,
@@ -67,7 +67,7 @@ const getOrders = async (req, res) => {
             res.status(401).json({ message: 'Unauthorized: user not found' });
             return;
         }
-        const orders = await prismaClient_1.default.order.findMany({
+        const orders = await prisma_1.default.order.findMany({
             where: { userId },
             orderBy: { createdAt: 'desc' },
             include: {
@@ -108,7 +108,7 @@ const getSingleOrder = async (req, res) => {
             res.status(400).json({ message: 'Invalid order ID' });
             return;
         }
-        const order = await prismaClient_1.default.order.findFirst({
+        const order = await prisma_1.default.order.findFirst({
             where: {
                 id: orderId,
                 userId: userId,

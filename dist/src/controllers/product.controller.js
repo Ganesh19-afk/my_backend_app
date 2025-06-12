@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getSingleProduct = exports.updateProduct = exports.deleteProduct = exports.getAllCategories = exports.getProductsByCategory = exports.getProduct = exports.createProduct = void 0;
-const prismaClient_1 = __importDefault(require("../../prisma/prismaClient"));
+const prisma_1 = __importDefault(require("../Db/prisma"));
 const generateSlug = (name) => {
     return name.trim().toLowerCase().replace(/\s+/g, '-');
 };
@@ -27,19 +27,19 @@ const createProduct = async (req, res) => {
             return;
         }
         const connectedCategories = await Promise.all(categoryList.map(async (catName) => {
-            let category = await prismaClient_1.default.category.findUnique({ where: { name: catName } });
+            let category = await prisma_1.default.category.findUnique({ where: { name: catName } });
             if (!category) {
-                category = await prismaClient_1.default.category.create({ data: { name: catName } });
+                category = await prisma_1.default.category.create({ data: { name: catName } });
             }
             return { id: category.id };
         }));
         const baseSlug = generateSlug(name);
         let slug = baseSlug;
         let suffix = 1;
-        while (await prismaClient_1.default.product.findUnique({ where: { slug } })) {
+        while (await prisma_1.default.product.findUnique({ where: { slug } })) {
             slug = `${baseSlug}-${suffix++}`;
         }
-        const product = await prismaClient_1.default.product.create({
+        const product = await prisma_1.default.product.create({
             data: {
                 name,
                 price: parseFloat(price),
@@ -83,7 +83,7 @@ const getProduct = async (req, res) => {
         const limit = 10;
         const skip = (page - 1) * limit;
         const [products, totalCount] = await Promise.all([
-            prismaClient_1.default.product.findMany({
+            prisma_1.default.product.findMany({
                 skip,
                 take: limit,
                 include: { categories: true, variants: {
@@ -92,7 +92,7 @@ const getProduct = async (req, res) => {
                         }
                     } },
             }),
-            prismaClient_1.default.product.count(),
+            prisma_1.default.product.count(),
         ]);
         res.status(200).json({
             page,
@@ -115,14 +115,14 @@ const getProductsByCategory = async (req, res) => {
     }
     try {
         // Step 1: Find the category by name
-        const category = await prismaClient_1.default.category.findUnique({
+        const category = await prisma_1.default.category.findUnique({
             where: { name: categoryName },
         });
         if (!category) {
             res.status(404).json({ error: "Category not found" });
             return;
         }
-        const products = await prismaClient_1.default.product.findMany({
+        const products = await prisma_1.default.product.findMany({
             where: {
                 categories: {
                     some: {
@@ -145,7 +145,7 @@ const getProductsByCategory = async (req, res) => {
 exports.getProductsByCategory = getProductsByCategory;
 const getAllCategories = async (req, res) => {
     try {
-        const categories = await prismaClient_1.default.category.findMany();
+        const categories = await prisma_1.default.category.findMany();
         res.status(200).json(categories);
     }
     catch (e) {
@@ -161,7 +161,7 @@ const deleteProduct = async (req, res) => {
         return;
     }
     try {
-        const deleteprod = await prismaClient_1.default.product.delete({ where: { id: +id } });
+        const deleteprod = await prisma_1.default.product.delete({ where: { id: +id } });
         res.status(200).json({ message: 'product deleted successfully', deleteprod });
     }
     catch (e) {
@@ -180,7 +180,7 @@ const updateProduct = async (req, res) => {
     const baseSlug = generateSlug(name);
     let slug = baseSlug;
     let suffix = 1;
-    while (await prismaClient_1.default.product.findUnique({ where: { slug } })) {
+    while (await prisma_1.default.product.findUnique({ where: { slug } })) {
         slug = `${baseSlug}-${suffix++}`;
     }
     try {
@@ -202,15 +202,15 @@ const updateProduct = async (req, res) => {
                 .map((c) => c.trim())
                 .filter(Boolean);
             const connectedCategories = await Promise.all(categoriesArray.map(async (name) => {
-                let category = await prismaClient_1.default.category.findUnique({ where: { name } });
+                let category = await prisma_1.default.category.findUnique({ where: { name } });
                 if (!category) {
-                    category = await prismaClient_1.default.category.create({ data: { name } });
+                    category = await prisma_1.default.category.create({ data: { name } });
                 }
                 return { id: category.id };
             }));
             updateData.categories = { set: connectedCategories };
         }
-        const updatedProduct = await prismaClient_1.default.product.update({
+        const updatedProduct = await prisma_1.default.product.update({
             where: { id: Number(id) },
             data: updateData,
             include: { categories: true,
@@ -235,7 +235,7 @@ const getSingleProduct = async (req, res) => {
         return;
     }
     try {
-        const product = await prismaClient_1.default.product.findUnique({
+        const product = await prisma_1.default.product.findUnique({
             where: { slug: String(slug) },
             include: {
                 categories: true,

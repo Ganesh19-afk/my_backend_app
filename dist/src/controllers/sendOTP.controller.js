@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.verifyOtp = exports.sendOTP = void 0;
-const prismaClient_1 = __importDefault(require("../../prisma/prismaClient"));
+const prisma_1 = __importDefault(require("../Db/prisma"));
 const otpGenerator_1 = require("../scripts/otpGenerator");
 const nodemailer_1 = __importDefault(require("nodemailer"));
 const transporter = nodemailer_1.default.createTransport({
@@ -21,7 +21,7 @@ const sendOTP = async (req, res) => {
             res.status(400).json({ error: "Email is required" });
             return;
         }
-        const user = await prismaClient_1.default.user.findUnique({ where: { email } });
+        const user = await prisma_1.default.user.findUnique({ where: { email } });
         if (!user) {
             res.status(404).json({ error: "User not found" });
             return;
@@ -29,7 +29,7 @@ const sendOTP = async (req, res) => {
         const otp = (0, otpGenerator_1.generateOTP)();
         const resetToken = (0, otpGenerator_1.generateResetToken)(); // e.g., secure hex string
         const otpExpiry = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
-        await prismaClient_1.default.user.update({
+        await prisma_1.default.user.update({
             where: { email },
             data: {
                 otp,
@@ -71,7 +71,7 @@ exports.sendOTP = sendOTP;
 const verifyOtp = async (req, res) => {
     const { email, otp } = req.body;
     try {
-        const user = await prismaClient_1.default.user.findUnique({
+        const user = await prisma_1.default.user.findUnique({
             where: { email }
         });
         if (!user) {
@@ -84,7 +84,7 @@ const verifyOtp = async (req, res) => {
         }
         if (!user.otpExpiry || new Date(user.otpExpiry) < new Date()) {
             // Clear expired OTP
-            await prismaClient_1.default.user.update({
+            await prisma_1.default.user.update({
                 where: { email },
                 data: {
                     otp: null,
@@ -96,7 +96,7 @@ const verifyOtp = async (req, res) => {
             return;
         }
         // OTP is valid — clear OTP fields
-        await prismaClient_1.default.user.update({
+        await prisma_1.default.user.update({
             where: { email },
             data: {
                 otp: null,

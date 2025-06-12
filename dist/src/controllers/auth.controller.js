@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.changePassword = exports.resetPasswordWithOtp = exports.loginUser = exports.registerUser = void 0;
 const hash_1 = require("../scripts/hash");
-const prismaClient_1 = __importDefault(require("../../prisma/prismaClient"));
+const prisma_1 = __importDefault(require("../Db/prisma"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jwt_1 = require("../scripts/jwt");
 const registerUser = async (req, res) => {
@@ -18,13 +18,13 @@ const registerUser = async (req, res) => {
             res.status(400).json({ error: "All fields are required" });
             return;
         }
-        const existingUser = await prismaClient_1.default.user.findUnique({ where: { email } });
+        const existingUser = await prisma_1.default.user.findUnique({ where: { email } });
         if (existingUser) {
             res.status(400).json({ error: "User already exists" });
             return;
         }
         const hashed = await (0, hash_1.hashPassword)(password);
-        const user = await prismaClient_1.default.user.create({
+        const user = await prisma_1.default.user.create({
             data: {
                 name,
                 email,
@@ -53,7 +53,7 @@ const loginUser = async (req, res) => {
             res.status(400).json({ error: "Email and password required" });
             return;
         }
-        const user = await prismaClient_1.default.user.findUnique({ where: { email } });
+        const user = await prisma_1.default.user.findUnique({ where: { email } });
         if (!user || !user.password) {
             res.status(401).json({ error: "Invalid email or password" });
             return;
@@ -83,12 +83,12 @@ const resetPasswordWithOtp = async (req, res) => {
         return;
     }
     try {
-        const user = await prismaClient_1.default.user.findUnique({ where: { email } });
+        const user = await prisma_1.default.user.findUnique({ where: { email } });
         if (!user) {
             res.status(400).json({ message: "user not found " });
         }
         const hashedPassword = await (0, hash_1.hashPassword)(password);
-        await prismaClient_1.default.user.update({
+        await prisma_1.default.user.update({
             where: { email },
             data: {
                 password: hashedPassword,
@@ -111,7 +111,7 @@ const changePassword = async (req, res) => {
     }
     try {
         // 1. Find the user
-        const user = await prismaClient_1.default.user.findUnique({ where: { email } });
+        const user = await prisma_1.default.user.findUnique({ where: { email } });
         if (!user) {
             res.status(404).json({ error: 'User not found.' });
             return;
@@ -125,7 +125,7 @@ const changePassword = async (req, res) => {
         // 3. Hash new password
         const hashedPassword = await bcryptjs_1.default.hash(newPassword, 10);
         // 4. Update password
-        await prismaClient_1.default.user.update({
+        await prisma_1.default.user.update({
             where: { email },
             data: { password: hashedPassword },
         });

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import prisma from "../../prisma/prismaClient";
+import prisma from '../Db/prisma';
 import { generateOTP, generateResetToken } from "../scripts/otpGenerator";
 import nodemailer from "nodemailer";
 

@@ -4,9 +4,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteAddress = exports.updateAddress = exports.getAddress = exports.createAddress = void 0;
-const prismaClient_1 = __importDefault(require("../../prisma/prismaClient"));
+// import prisma from '../../prisma/prismaClient'
 const addressTypes_1 = require("../Types/addressTypes");
 const zod_1 = require("zod");
+const prisma_1 = __importDefault(require("../Db/prisma"));
+// import prisma from '../../prisma/prismaClient';
 const createAddress = async (req, res) => {
     try {
         // Extract userId from authenticated request (req.user)
@@ -23,7 +25,7 @@ const createAddress = async (req, res) => {
             userId,
             ...addressData,
         };
-        const address = await prismaClient_1.default.address.create({
+        const address = await prisma_1.default.address.create({
             data: dataToCreate,
         });
         res.status(201).json(address);
@@ -45,7 +47,7 @@ const getAddress = async (req, res) => {
         return;
     }
     try {
-        const addresses = await prismaClient_1.default.address.findMany({
+        const addresses = await prisma_1.default.address.findMany({
             where: { userId }
         });
         res.status(200).json(addresses);
@@ -68,14 +70,14 @@ const updateAddress = async (req, res) => {
             return;
         }
         const updateData = addressTypes_1.updateAddressSchema.parse(req.body);
-        const existingAddress = await prismaClient_1.default.address.findUnique({
+        const existingAddress = await prisma_1.default.address.findUnique({
             where: { id: addressId },
         });
         if (!existingAddress || existingAddress.userId !== userId) {
             res.status(404).json({ message: 'Address not found or access denied' });
             return;
         }
-        const updatedAddress = await prismaClient_1.default.address.update({
+        const updatedAddress = await prisma_1.default.address.update({
             where: { id: addressId },
             data: updateData,
         });
@@ -102,7 +104,7 @@ const deleteAddress = async (req, res) => {
             res.status(400).json({ message: 'Invalid address ID' });
             return;
         }
-        const existingAddress = await prismaClient_1.default.address.findUnique({
+        const existingAddress = await prisma_1.default.address.findUnique({
             where: { id: addressId },
         });
         if (!existingAddress || existingAddress.userId !== userId) {
@@ -110,7 +112,7 @@ const deleteAddress = async (req, res) => {
             return;
         }
         // Delete the address
-        await prismaClient_1.default.address.delete({
+        await prisma_1.default.address.delete({
             where: { id: addressId },
         });
         res.status(200).json({ message: 'Address deleted successfully' });

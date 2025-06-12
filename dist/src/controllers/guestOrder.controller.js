@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.guestOrder = void 0;
-const prismaClient_1 = __importDefault(require("../../prisma/prismaClient"));
+const prisma_1 = __importDefault(require("../Db/prisma"));
 const guestOrder = async (req, res) => {
     try {
         const { subTotal, tax, discount, deliveryCharge, finalTotal, billingAddress, deliveryAddress, products, paymentType, transactionId, paymentDatetime, paymentStatus, } = req.body;
@@ -18,7 +18,7 @@ const guestOrder = async (req, res) => {
             unitPrice: item.unitPrice,
             quantity: item.quantity,
         }));
-        const order = await prismaClient_1.default.order.create({
+        const order = await prisma_1.default.order.create({
             data: {
                 subTotal,
                 tax,

@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteVariant = exports.updateVariant = exports.getVariant = exports.createVariant = void 0;
-const prismaClient_1 = __importDefault(require("../../prisma/prismaClient"));
+const prisma_1 = __importDefault(require("../Db/prisma"));
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const createVariant = async (req, res) => {
@@ -15,7 +15,7 @@ const createVariant = async (req, res) => {
             res.status(400).json({ message: "Images are required." });
             return;
         }
-        const variant = await prismaClient_1.default.variant.create({
+        const variant = await prisma_1.default.variant.create({
             data: {
                 description,
                 specification: JSON.parse(specification),
@@ -40,7 +40,7 @@ const getVariant = async (req, res) => {
     if (!variantId) {
         res.status(401).json({ message: "varient id required" });
     }
-    const variant = await prismaClient_1.default.variant.findUnique({
+    const variant = await prisma_1.default.variant.findUnique({
         where: { id: +variantId },
         include: {
             images: true,
@@ -72,7 +72,7 @@ const updateVariant = async (req, res) => {
             data.stock = parseInt(stock);
         if (files && files.length > 0) {
             // First delete existing images of this variant
-            await prismaClient_1.default.variantimage.deleteMany({
+            await prisma_1.default.variantimage.deleteMany({
                 where: { variantId },
             });
             // Then create new images
@@ -80,7 +80,7 @@ const updateVariant = async (req, res) => {
                 create: files.map(file => ({ url: `/uploads/${file.filename}` })),
             };
         }
-        const updatedVariant = await prismaClient_1.default.variant.update({
+        const updatedVariant = await prisma_1.default.variant.update({
             where: { id: variantId },
             data,
             include: { images: true },
@@ -99,11 +99,11 @@ const deleteVariant = async (req, res) => {
             res.status(400).json({ message: "Invalid variant ID" });
             return;
         }
-        const existingImages = await prismaClient_1.default.variantimage.findMany({
+        const existingImages = await prisma_1.default.variantimage.findMany({
             where: { variantId },
         });
         // Delete variant and its related images in one query
-        await prismaClient_1.default.variant.delete({
+        await prisma_1.default.variant.delete({
             where: { id: variantId },
             include: { images: true },
         });
