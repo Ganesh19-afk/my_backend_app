@@ -225,7 +225,7 @@ export const updateProduct = async (req: Request, res: Response) => {
       // tag: tags,
     };
     if (req.file) {
-      updateData.image =`/upload/${req.file.filename}`; // or use req.file.path based on your setup
+      updateData.image =req.file?.path || null;; // or use req.file.path based on your setup
     }
 
     if (categoryName) {

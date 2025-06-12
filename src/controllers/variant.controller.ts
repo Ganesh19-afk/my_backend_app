@@ -21,7 +21,7 @@ export const createVariant = async (req: Request, res: Response) => {
         stock: parseInt(stock),
         product: { connect: { id: Number(productId) } },
         images: {
-          create: files.map(file => ({ url: `/uploads/${file.filename}` })),
+          create: files.map(file => ({ url: file.path })),
         },
       },
       include: { images: true },
@@ -75,7 +75,7 @@ export const updateVariant = async (req: Request, res: Response) => {
 
       // Then create new images
       data.images = {
-        create: files.map(file => ({ url: `/uploads/${file.filename}` })),
+        create: files.map(file => ({ url: file.path })),
       };
     }
 

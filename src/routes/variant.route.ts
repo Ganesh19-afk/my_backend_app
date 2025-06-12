@@ -9,6 +9,6 @@ router.get('/',getVariant);
 router.use(authenticate,authorizeAdmin)
 router.post('/addvariant',upload.array('image'),createVariant);
 router.patch('/update/:id',upload.array('image'),updateVariant)
-router.post('/delete/:id',deleteVariant);
+router.delete('/delete/:id',deleteVariant);
 
 export default router ; 
