@@ -9,6 +9,9 @@ import { authenticate } from './scripts/jwt';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import compression from 'compression';
+import invoiceRoutes from './routes/orderInvoice.route'
+import testRoutes from './routes/test.route'
 const app = express();
 const port = 5000;
 
@@ -16,6 +19,7 @@ app.use('/uploads', express.static('uploads'));
 
 
 app.use(express.json());
+app.use(compression());
 
 app.use(cors({ origin: 'http://localhost:3000' }));
 
@@ -32,13 +36,16 @@ const authLimiter = rateLimit({
   }
 });
 
+app.use("/test",testRoutes)
 app.use('/user',userRoutes)
 
 app.use("/api/auth/",authRoutes);
 
 app.use("/product", productRoutes)
 
-app.use("/order",orderRoutes)
+app.use("/order",orderRoutes);
+
+app.use("/api/order", invoiceRoutes);   
 
 
  app.listen(port, ()=>{

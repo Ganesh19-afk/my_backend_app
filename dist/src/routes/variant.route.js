@@ -12,5 +12,5 @@ router.get('/', variant_controller_1.getVariant);
 router.use(jwt_1.authenticate, jwt_1.authorizeAdmin);
 router.post('/addvariant', upload_middleware_1.upload.array('image'), variant_controller_1.createVariant);
 router.patch('/update/:id', upload_middleware_1.upload.array('image'), variant_controller_1.updateVariant);
-router.post('/delete/:id', variant_controller_1.deleteVariant);
+router.delete('/delete/:id', variant_controller_1.deleteVariant);
 exports.default = router;

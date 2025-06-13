@@ -23,7 +23,7 @@ const createVariant = async (req, res) => {
                 stock: parseInt(stock),
                 product: { connect: { id: Number(productId) } },
                 images: {
-                    create: files.map(file => ({ url: `/uploads/${file.filename}` })),
+                    create: files.map(file => ({ url: file.path })),
                 },
             },
             include: { images: true },
@@ -77,7 +77,7 @@ const updateVariant = async (req, res) => {
             });
             // Then create new images
             data.images = {
-                create: files.map(file => ({ url: `/uploads/${file.filename}` })),
+                create: files.map(file => ({ url: file.path })),
             };
         }
         const updatedVariant = await prisma_1.default.variant.update({
