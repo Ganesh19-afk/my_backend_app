@@ -10,7 +10,7 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
     const { name, email, } = req.body;
     const password = String(req.body.password);
      const age = req.body.age ? Number(req.body.age) : undefined
-    const profile = req.file?.filename;
+    const profile = req.file?.path;
 
     if (!name || !email || !password || !profile) {
       res.status(400).json({ error: "All fields are required" });
