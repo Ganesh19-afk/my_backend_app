@@ -1,5 +1,5 @@
 import express from 'express';
-import { createProduct, deleteProduct, getAllCategories, getProduct, getProductsByCategory, getSingleProduct, updateProduct } from '../controllers/product.controller';
+import { createProduct, deleteProduct, filterProducts, getAllCategories, getProduct, getProductsByCategory, getSingleProduct, updateProduct } from '../controllers/product.controller';
 import { upload } from '../../middlewares/upload.middleware';  
 import { authenticate, authorizeAdmin } from '../scripts/jwt';
 import variantRoutes from '../routes/variant.route'
@@ -8,6 +8,7 @@ const router = express.Router();
 
 
 router.get('/', getProduct);
+router.get('/filter',filterProducts)
 router.get('/category',getProductsByCategory)
 router.get('/categories',getAllCategories)
 router.get('/product_info/:slug',getSingleProduct)

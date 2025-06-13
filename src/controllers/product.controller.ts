@@ -300,4 +300,63 @@ export const getSingleProduct = async (req: Request, res: Response):Promise<void
   }
 };
 
+export const filterProducts = async (req: Request, res: Response) => {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    const sort = req.query.sort as string; // 'asc' or 'desc'
+    const minPrice = parseFloat(req.query.minPrice as string);
+    const maxPrice = parseFloat(req.query.maxPrice as string);
+
+    const where: any = {};
+
+    // Price filtering logic
+    if (!isNaN(minPrice) && !isNaN(maxPrice)) {
+      where.price = {
+        gte: minPrice,
+        lte: maxPrice,
+      };
+    } else if (!isNaN(minPrice)) {
+      where.price = { gte: minPrice };
+    } else if (!isNaN(maxPrice)) {
+      where.price = { lte: maxPrice };
+    }
+
+    // Sorting logic
+    let orderBy: any = undefined;
+    if (sort === 'asc' || sort === 'desc') {
+      orderBy = { price: sort };
+    }
+
+    const [products, totalCount] = await Promise.all([
+      prisma.product.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy,
+        include: {
+          categories: true,
+          variants: {
+            include: { images: true },
+          },
+        },
+      }),
+      prisma.product.count({ where }),
+    ]);
+
+    res.status(200).json({
+      page,
+      totalPages: Math.ceil(totalCount / limit),
+      totalItems: totalCount,
+      items: products,
+    });
+
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "Failed to filter products" });
+  }
+};
+
 
